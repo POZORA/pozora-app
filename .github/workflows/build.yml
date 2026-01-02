@@ -14,6 +14,8 @@ jobs:
         run: |
           npm install
           npm install @capacitor/cli @capacitor/android @capacitor/core
+          # ここで一度、capがどこにあるか確認
+          find node_modules -name cap
 
       - name: Create Config and Assets
         run: |
@@ -23,16 +25,16 @@ jobs:
 
       - name: Reconstruct Android Project
         run: |
-          # 徹底的に掃除してから、詳細ログ（--verbose）付きで実行
+          # エラーが出ても止まらずに、ログを全部表示させる
           rm -rf android
-          node ./node_modules/@capacitor/cli/bin/cap add android --verbose
-          node ./node_modules/@capacitor/cli/bin/cap sync android --verbose
+          npx cap add android || (ls -R && exit 1)
+          npx cap sync android
 
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
