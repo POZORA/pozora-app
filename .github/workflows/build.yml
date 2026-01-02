@@ -22,10 +22,10 @@ jobs:
           mkdir -p www
           echo '<html><body>POZORA OS</body></html>' > www/index.html
 
-      - name: Sync Capacitor
+      - name: Capacitor Update and Sync
         run: |
-          chmod +x ./node_modules/.bin/cap
-          ./node_modules/.bin/cap copy
+          npx cap add android || true
+          npx cap sync android
 
       - name: Build Android APK
         run: |
