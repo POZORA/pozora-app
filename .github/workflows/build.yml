@@ -14,14 +14,18 @@ jobs:
         run: |
           npm install
           npm install @capacitor/cli @capacitor/android @capacitor/core
+          # もし設定ファイルがなければ作成
           if [ ! -f capacitor.config.json ]; then
             echo '{"appId": "com.pozora.app", "appName": "POZORA-OS", "webDir": "www"}' > capacitor.config.json
           fi
 
       - name: Reconstruct Android Project
         run: |
-          # npxを使わずに直接バイナリを叩く
           rm -rf android
+          # node_modules内の実行ファイルに実行権限を強制付与
+          chmod -R +x ./node_modules/.bin/
+          
+          # 直接バイナリを指定して実行
           ./node_modules/.bin/cap add android
           ./node_modules/.bin/cap sync android
 
