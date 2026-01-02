@@ -15,18 +15,18 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-          # ローカルの node_modules に CLI を確実に入れる
           npm install @capacitor/cli @capacitor/android @capacitor/core
 
       - name: Prepare Web Assets
         run: |
           mkdir -p www
-          echo '<html><body>POZORA OS</body></html>' > www/index.html
+          echo '<html><head><title>POZORA OS</title></head><body><h1>POZORA OS IS RUNNING</h1></body></html>' > www/index.html
 
-      - name: Capacitor Update and Sync
+      - name: Reconstruct Android Project
         run: |
-          # npxを使わず直接バイナリを指定
-          node ./node_modules/@capacitor/cli/bin/cap add android || true
+          # 既存のandroidフォルダがあれば消して、新しく作り直す
+          rm -rf android
+          node ./node_modules/@capacitor/cli/bin/cap add android
           node ./node_modules/@capacitor/cli/bin/cap sync android
 
       - name: Build Android APK
