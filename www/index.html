@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS CODE TASK - POZORA V1.0β</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f5;
+            --bg-tertiary: #e4e4e7;
+            --text-primary: #18181b;
+            --text-secondary: #71717a;
+            --border: #d4d4d8;
+            --accent: #18181b;
+            --accent-inverse: #ffffff;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --radius: 8px;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --console-width: 350px;
+        }
+
+        .dark {
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --bg-tertiary: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --border: #3f3f46;
+            --accent: #fafafa;
+            --accent-inverse: #09090b;
+            --danger: #f87171;
+            --success: #34d399;
+            --warning: #fbbf24;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+        
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .main-wrapper {
+            transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        body.console-active .main-wrapper {
+            width: calc(100% - var(--console-width));
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+
+        .header-controls { display: flex; gap: 0.5rem; }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            gap: 0.5rem;
+        }
+        
+        button:hover { background-color: var(--bg-secondary); }
+        button:active { transform: translateY(1px); }
+        
+        button.active {
+            background-color: var(--bg-secondary);
+            border-color: var(--text-primary);
+        }
+
+        button.primary {
+            background-color: var(--accent);
+            color: var(--accent-inverse);
+            border-color: var(--accent);
+        }
+
+        button.danger {
+            color: var(--danger);
+            border-color: var(--border);
+        }
+
+        button.icon-btn { padding: 0.5rem; }
+
+        .task-list { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .task-list.grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            align-items: start;
+        }
+
+        .task-card {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .task-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-secondary);
+            cursor: pointer;
+        }
+
+        .task-title-group { display: flex; align-items: center; gap: 0.75rem; flex: 1; }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--border);
+        }
+        .status-indicator.active { background-color: var(--text-primary); }
+        .status-indicator.error { background-color: var(--danger); }
+        .status-indicator.success { background-color: var(--success); }
+
+        input.task-name-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            outline: none;
+        }
+
+        .task-body {
+            padding: 1.5rem;
+            display: none;
+            border-top: 1px solid var(--border);
+        }
+        
+        .task-card.expanded .task-body { display: block; }
+
+        details.schedule-details {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--bg-primary);
+        }
+        
+        details.schedule-details summary {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .schedule-grid {
+            display: grid;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            background-color: var(--bg-secondary);
+        }
+
+        .schedule-row {
+            display: grid;
+            grid-template-columns: 60px 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            background-color: var(--bg-primary);
+            border: 1px solid transparent;
+        }
+        
+        .schedule-row.active { border-color: var(--text-primary); }
+
+        .day-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .custom-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        input[type="checkbox"] { display: none; }
+        input[type="checkbox"]:checked + .custom-checkbox {
+            background-color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+        input[type="checkbox"]:checked + .custom-checkbox::after {
+            content: '';
+            position: absolute;
+            width: 4px; height: 8px;
+            border: solid var(--bg-primary);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            left: 5px; top: 1px;
+        }
+
+        input[type="time"] {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+        }
+
+
+        /* ダークモード時の時間入力アイコンの色を白くする */
+        .dark input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .code-editor-container {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        .editor-header {
+            background-color: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        textarea.code-editor {
+            width: 100%;
+            min-height: 150px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: none;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .last-run-status { font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); }
+
+        #global-console {
+            position: fixed; top: 0; right: 0; bottom: 0; width: var(--console-width);
+            background-color: var(--bg-secondary); border-left: 1px solid var(--border);
+            transform: translateX(100%); transition: transform 0.3s; z-index: 100;
+            display: flex; flex-direction: column;
+        }
+
+        body.console-active #global-console { transform: translateX(0); }
+
+        .console-header {
+            padding: 1rem; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--bg-tertiary); font-weight: 600;
+        }
+
+        .console-logs { flex: 1; overflow-y: auto; padding: 1rem; font-family: var(--font-mono); font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+        .log-entry { padding: 0.5rem; border-radius: 4px; background-color: var(--bg-primary); border: 1px solid var(--border); }
+        .log-entry.error { border-left: 3px solid var(--danger); }
+        .log-entry.success { border-left: 3px solid var(--success); }
+        .log-time { color: var(--text-secondary); font-size: 0.7rem; display: block; }
+
+        svg { width: 1.25rem; height: 1.25rem; stroke-width: 2; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="container">
+        <header>
+            <h1>JS CODE TASK - POZORA <span id="sys-time-display" style="font-size: 0.8rem; font-weight: normal; color: var(--text-secondary);"></span></h1>
+            <div class="header-controls">
+                <button class="icon-btn" id="console-toggle" onclick="scheduler.toggleConsole()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                </button>
+                <button class="icon-btn" id="theme-toggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+                <button class="icon-btn" id="view-toggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <button class="primary" onclick="scheduler.addTask()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New Task
+                </button>
+            </div>
+        </header>
+        <div id="task-container" class="task-list"></div>
+    </div>
+</div>
+
+<div id="global-console">
+    <div class="console-header">
+        <span>System Console</span>
+        <button class="icon-btn" onclick="scheduler.clearConsole()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </button>
+    </div>
+    <div class="console-logs" id="console-logs"></div>
+</div>
+
+<script>
+    const ICONS = {
+        chevronDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+        play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+        trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+        zap: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+    };
+
+    class Scheduler {
+        constructor() {
+            this.tasks = JSON.parse(localStorage.getItem('js_scheduler_tasks')) || [];
+            this.container = document.getElementById('task-container');
+            this.results = {};
+            this.isGridView = localStorage.getItem('js_scheduler_view') === 'grid';
+            this.isConsoleOpen = localStorage.getItem('js_scheduler_console') === 'open';
+            this.lastExecutedMinute = "";
+
+            this.initTheme();
+            this.initView();
+            this.initConsole();
+            this.render();
+            this.startLoop();
+
+            // --- ページ読み込み時にAutoRunがONのタスクを自動実行 ---
+            this.tasks.forEach(task => {
+                if (task.isAutoRun) {
+                    console.log(`[Auto-Run] Starting: ${task.name || 'Untitled'}`);
+                    this.executeTask(task);
+                }
+            });
+        }
+
+        initTheme() {
+            const isDark = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            });
+        }
+
+        initView() {
+            if (this.isGridView) this.container.classList.add('grid-view');
+            document.getElementById('view-toggle').addEventListener('click', () => {
+                this.isGridView = !this.isGridView;
+                this.container.classList.toggle('grid-view');
+                localStorage.setItem('js_scheduler_view', this.isGridView ? 'grid' : 'list');
+            });
+        }
+
+        initConsole() {
+            if (this.isConsoleOpen) {
+                document.body.classList.add('console-active');
+                document.getElementById('console-toggle').classList.add('active');
+            }
+        }
+
+        toggleConsole() {
+            this.isConsoleOpen = !this.isConsoleOpen;
+            document.body.classList.toggle('console-active');
+            document.getElementById('console-toggle').classList.toggle('active');
+            localStorage.setItem('js_scheduler_console', this.isConsoleOpen ? 'open' : 'closed');
+        }
+
+        logToGlobal(message, type = 'info', source = 'System') {
+            const logsContainer = document.getElementById('console-logs');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="log-time">[${time}] ${source}</span>${message}`;
+            logsContainer.insertBefore(entry, logsContainer.firstChild);
+        }
+
+        clearConsole() {
+            document.getElementById('console-logs').innerHTML = '';
+        }
+
+        save() {
+            localStorage.setItem('js_scheduler_tasks', JSON.stringify(this.tasks));
+        }
+
+        showToast(message, type = 'info') {
+            Swal.fire({
+                toast: true, position: 'top', icon: type === 'error' ? 'error' : 'success',
+                title: message, showConfirmButton: false, timer: 3000, timerProgressBar: true,
+                background: document.documentElement.classList.contains('dark') ? '#18181b' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#fafafa' : '#18181b'
+            });
+        }
+
+        addTask() {
+            const newTask = {
+                id: Date.now().toString(), name: '',
+                code: `// ここにJSコードを書いてね\nconsole.log("Hello POZORA!");`,
+                schedule: Array(7).fill().map(() => ({ active: false, time: '09:00' })),
+                lastRun: null, lastStatus: 'idle', isExpanded: true,
+                isAutoRun: false // オートランフラグ
+            };
+            this.tasks.push(newTask);
+            this.save();
+            this.render();
+        }
+
+        deleteTask(id) {
+            Swal.fire({
+                title: '削除しますか？', text: "この操作は取り消せません", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: '削除'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.tasks = this.tasks.filter(t => t.id !== id);
+                    this.save(); this.render();
+                    this.showToast('削除しました', 'success');
+                }
+            });
+        }
+
+        updateTask(id, updates) {
+            const task = this.tasks.find(t => t.id === id);
+            if(task) Object.assign(task, updates);
+            this.save();
+        }
+
+        updateSchedule(taskId, dayIndex, updates, element) {
+            const task = this.tasks.find(t => t.id === taskId);
+            if(!task) return;
+            task.schedule[dayIndex] = { ...task.schedule[dayIndex], ...updates };
+            this.save();
+
+            if (updates.hasOwnProperty('active')) {
+                const row = element.closest('.schedule-row');
+                if (updates.active) row.classList.add('active');
+                else row.classList.remove('active');
+            }
+        }
+
+        toggleExpand(id) {
+            const task = this.tasks.find(t => t.id === id);
+            if(task) {
+                task.isExpanded = !task.isExpanded;
+                this.save(); 
+                this.render();
+            }
+        }
+
+        // オートランの切り替え
+        toggleAutoRun(id) {
+            const task = this.tasks.find(t => t.id === id);
+            if(task) {
+                task.isAutoRun = !task.isAutoRun;
+                this.save();
+                this.render();
+                this.showToast(task.isAutoRun ? 'Auto-Run ON' : 'Auto-Run OFF');
+            }
+        }
+
+        async executeTask(task, isManual = false) {
+            if (!task) return;
+            const taskName = task.name || 'Untitled Task';
+            const statusEl = document.getElementById(`status-${task.id}`);
+            const indicatorEl = document.getElementById(`indicator-${task.id}`);
+            
+            try {
+                if (statusEl) statusEl.textContent = "Running...";
+                if (indicatorEl) indicatorEl.className = "status-indicator active";
+                
+                const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+                const func = new AsyncFunction('results', 'console', task.code);
+                
+                const customConsole = {
+                    log: (...args) => this.logToGlobal(args.join(' '), 'info', taskName),
+                    error: (...args) => this.logToGlobal(args.join(' '), 'error', taskName)
+                };
+
+                const result = await func(this.results, customConsole);
+                if (task.name) this.results[task.name] = result;
+                
+                task.lastRun = new Date().toLocaleString();
+                task.lastStatus = 'success';
+                
+                if (statusEl) statusEl.textContent = `Last run: ${task.lastRun}`;
+                if (indicatorEl) indicatorEl.className = "status-indicator success";
+                
+                if (isManual) this.showToast('タスク完了', 'success');
+                this.logToGlobal(`Result: ${JSON.stringify(result)}`, 'success', taskName);
+            } catch (e) {
+                task.lastStatus = 'error';
+                task.lastRun = new Date().toLocaleString();
+                if (statusEl) statusEl.textContent = `Error: ${e.message}`;
+                if (indicatorEl) indicatorEl.className = "status-indicator error";
+                this.logToGlobal(e.message, 'error', taskName);
+            }
+            this.save();
+        }
+
+        startLoop() {
+            const daysArr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            setInterval(() => {
+                const now = new Date();
+                const currentDay = now.getDay();
+                
+                const sysTimeEl = document.getElementById('sys-time-display');
+                if(sysTimeEl) sysTimeEl.textContent = `(Today: ${daysArr[currentDay]} ${now.toLocaleTimeString()})`;
+
+                const hours = String(now.getHours()).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const currentHHmm = `${hours}:${mins}`;
+
+                if (this.lastExecutedMinute === currentHHmm) return;
+
+                this.tasks.forEach(task => {
+                    const config = task.schedule[currentDay];
+                    if (config && config.active && config.time === currentHHmm) {
+                        this.executeTask(task);
+                    }
+                });
+
+                this.lastExecutedMinute = currentHHmm;
+            }, 1000);
+        }
+
+        render() {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            this.container.innerHTML = this.tasks.map(task => `
+                <div class="task-card ${task.isExpanded ? 'expanded' : ''}">
+                    <div class="task-header" onclick="scheduler.toggleExpand('${task.id}')">
+                        <div class="task-title-group">
+                            <div id="indicator-${task.id}" class="status-indicator ${task.lastStatus}"></div>
+                            <input type="text" class="task-name-input" value="${task.name}" placeholder="Untitled Task" onclick="event.stopPropagation()" onchange="scheduler.updateTask('${task.id}', {name: this.value})">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+                            ${task.isAutoRun ? `<span style="color: var(--success); font-size: 0.8rem; display: flex; align-items: center; gap: 2px;">${ICONS.zap} Auto</span>` : ''}
+                            ${ICONS.chevronDown}
+                        </div>
+                    </div>
+                    <div class="task-body">
+                        <details class="schedule-details" open>
+                            <summary>Schedule Settings</summary>
+                            <div class="schedule-grid">
+                                ${task.schedule.map((s, i) => `
+                                    <div class="schedule-row ${s.active ? 'active' : ''}">
+                                        <label class="day-toggle">
+                                            <input type="checkbox" ${s.active ? 'checked' : ''} onchange="scheduler.updateSchedule('${task.id}', ${i}, {active: this.checked}, this)">
+                                            <span class="custom-checkbox"></span>
+                                            ${days[i]}
+                                        </label>
+                                        <input type="time" value="${s.time}" onchange="scheduler.updateSchedule('${task.id}', ${i}, {time: this.value}, this)">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                        <div class="code-editor-container">
+                            <div class="editor-header">JavaScript Code</div>
+                            <textarea class="code-editor" spellcheck="false" onchange="scheduler.updateTask('${task.id}', {code: this.value})">${task.code}</textarea>
+                        </div>
+                        <div class="task-footer">
+                            <span class="last-run-status" id="status-${task.id}">${task.lastRun ? `Last run: ${task.lastRun}` : 'Ready'}</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="danger" onclick="scheduler.deleteTask('${task.id}')">${ICONS.trash} Delete</button>
+                                <button class="${task.isAutoRun ? 'primary' : ''}" onclick="scheduler.toggleAutoRun('${task.id}')">
+                                    ${ICONS.zap} ${task.isAutoRun ? 'Auto: ON' : 'Auto: OFF'}
+                                </button>
+                                <button class="primary" onclick="scheduler.executeTask(scheduler.tasks.find(t => t.id === '${task.id}'), true)">${ICONS.play} Run Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    window.scheduler = new Scheduler();
+</script>
+</body>
+</html>
