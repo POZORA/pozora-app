@@ -17,11 +17,15 @@ jobs:
           npm install
           npm install @capacitor/cli @capacitor/core @capacitor/android
 
-      - name: Debug Folder Structure
-        run: ls -R
+      - name: Prepare Web Assets
+        run: |
+          mkdir -p www
+          echo '<html><body>POZORA OS</body></html>' > www/index.html
 
       - name: Sync Capacitor
-        run: ./node_modules/.bin/cap copy
+        run: |
+          chmod +x ./node_modules/.bin/cap
+          ./node_modules/.bin/cap copy
 
       - name: Build Android APK
         run: |
