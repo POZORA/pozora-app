@@ -9,25 +9,31 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
       - name: Install Dependencies
         run: |
           npm install
           npm install @capacitor/cli @capacitor/android @capacitor/core
+
       - name: Create Config and Assets
         run: |
           echo '{"appId": "com.pozora.app", "appName": "POZORA-OS", "webDir": "www", "bundledWebRuntime": false}' > capacitor.config.json
           mkdir -p www
           echo '<html><body><h1>POZORA OS</h1></body></html>' > www/index.html
+
       - name: Reconstruct Android Project
         run: |
+          # 徹底的に掃除してから、詳細ログ（--verbose）付きで実行
           rm -rf android
-          node ./node_modules/@capacitor/cli/bin/cap add android
-          node ./node_modules/@capacitor/cli/bin/cap sync android
+          node ./node_modules/@capacitor/cli/bin/cap add android --verbose
+          node ./node_modules/@capacitor/cli/bin/cap sync android --verbose
+
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
