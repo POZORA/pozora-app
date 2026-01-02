@@ -5,21 +5,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
       - name: Install Dependencies
         run: |
           npm install
           npm install @capacitor/cli @capacitor/core @capacitor/android
+
+      - name: Debug Folder Structure
+        run: ls -R
+
       - name: Sync Capacitor
-        run: npx cap copy
+        run: ./node_modules/.bin/cap copy
+
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
