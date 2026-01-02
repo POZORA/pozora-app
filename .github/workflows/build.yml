@@ -10,24 +10,28 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install Dependencies
+      - name: Force Project Setup
         run: |
+          # 邪魔なファイルを一旦全削除
+          rm -rf android www capacitor.config.json package.json package-lock.json
+          
+          # 1. 完璧な package.json を作成
+          echo '{"name": "pozora-app", "version": "1.0.0", "dependencies": {"@capacitor/android": "^6.0.0", "@capacitor/cli": "^6.0.0", "@capacitor/core": "^6.0.0"}}' > package.json
+          
+          # 2. 依存関係をインストール
           npm install
-          npm install @capacitor/cli @capacitor/android @capacitor/core
-          # ここで一度、capがどこにあるか確認
-          find node_modules -name cap
-
-      - name: Create Config and Assets
-        run: |
-          echo '{"appId": "com.pozora.app", "appName": "POZORA-OS", "webDir": "www", "bundledWebRuntime": false}' > capacitor.config.json
+          
+          # 3. Web資産の作成
           mkdir -p www
-          echo '<html><body><h1>POZORA OS</h1></body></html>' > www/index.html
+          echo '<html><head><title>POZORA OS</title></head><body style="background:black;color:lime;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><h1>POZORA OS IS ONLINE</h1></body></html>' > www/index.html
+          
+          # 4. Capacitorの設定ファイルを作成
+          echo '{"appId": "com.pozora.app", "appName": "POZORA-OS", "webDir": "www", "bundledWebRuntime": false}' > capacitor.config.json
 
       - name: Reconstruct Android Project
         run: |
-          # エラーが出ても止まらずに、ログを全部表示させる
-          rm -rf android
-          npx cap add android || (ls -R && exit 1)
+          # Androidプロジェクトをゼロから生成
+          npx cap add android
           npx cap sync android
 
       - name: Build Android APK
