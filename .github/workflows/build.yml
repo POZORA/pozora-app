@@ -10,7 +10,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install @capacitor/cli @capacitor/core @capacitor/android
       - name: Sync Capacitor
         run: npx cap copy
       - name: Build Android APK
